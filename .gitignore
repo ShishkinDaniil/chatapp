@@ -44,3 +44,6 @@ app.*.map.json
 # FVM SDK
 .fvm/*
 !.fvm/fvm_config.json
+
+/lib/firebase_options.dart
+/android/app/google-services.json
