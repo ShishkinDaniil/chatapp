@@ -1,10 +1,11 @@
 import 'dart:ui';
 
-import 'package:chatapp/application/routes.dart';
 import 'package:chatapp/application/theme.dart';
 import 'package:chatapp/blocs/auth/auth_bloc.dart';
 import 'package:chatapp/repositories/auth_repository/auth_repository.dart';
-import 'package:chatapp/screens/login/auth_redirect.dart';
+import 'package:chatapp/screens/root/root_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,13 +18,8 @@ class ChatApp extends StatelessWidget {
   }
 
   Widget _buildApp(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider<AuthRepository>(
-          create: (context) => AuthRepository(),
-        ),
-      ],
-      child: MultiBlocProvider(
+    return _buildRepositories(
+      MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
             create: (context) => AuthBloc(
@@ -34,10 +30,27 @@ class ChatApp extends StatelessWidget {
         child: _AppLifeCycleWatcherForOnlineIndicator(
           child: MaterialApp(
             theme: ChatTheme.chatThemeData,
-            builder: (context, child) => const AuthRedirect(),
+            home: const RootScreen(),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRepositories(Widget child) {
+    final firestore = FirebaseFirestore.instance;
+    final firebaseAuth = FirebaseAuth.instance;
+
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepository>(
+          create: (context) => AuthRepository(
+            fireStore: firestore,
+            firebaseAuth: firebaseAuth,
+          ),
+        ),
+      ],
+      child: child,
     );
   }
 }
