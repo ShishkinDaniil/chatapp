@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:chatapp/application/theme.dart';
 import 'package:chatapp/blocs/auth/auth_bloc.dart';
 import 'package:chatapp/repositories/auth_repository/auth_repository.dart';
+import 'package:chatapp/repositories/chat_repository/chat_repository.dart';
 import 'package:chatapp/screens/root/root_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,7 +25,7 @@ class ChatApp extends StatelessWidget {
           BlocProvider<AuthBloc>(
             create: (context) => AuthBloc(
               context.read(),
-            ),
+            )..add(const AuthGoOnline()),
           )
         ],
         child: _AppLifeCycleWatcherForOnlineIndicator(
@@ -45,6 +46,12 @@ class ChatApp extends StatelessWidget {
       providers: [
         RepositoryProvider<AuthRepository>(
           create: (context) => AuthRepository(
+            fireStore: firestore,
+            firebaseAuth: firebaseAuth,
+          ),
+        ),
+        RepositoryProvider<ChatRepository>(
+          create: (context) => ChatRepository(
             fireStore: firestore,
             firebaseAuth: firebaseAuth,
           ),
@@ -74,6 +81,17 @@ class _AppLifeCycleWatcherForOnlineIndicatorState
     super.initState();
 
     _listener = AppLifecycleListener(
+      onShow: () {
+        final bloc = context.authBloc;
+
+        bloc.state.whenOrNull(
+          authorized: () {
+            if (!bloc.isOnline) {
+              bloc.add(const AuthGoOnline());
+            }
+          },
+        );
+      },
       onStateChange: _onStateChanged,
       onExitRequested: () async {
         print('exited');
@@ -94,17 +112,33 @@ class _AppLifeCycleWatcherForOnlineIndicatorState
   }
 
   void _onStateChanged(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.paused:
-        print('paused');
-      case AppLifecycleState.resumed:
-        print('resumed');
-      case AppLifecycleState.detached:
-        print('detached');
-      case AppLifecycleState.inactive:
-        print('inactive');
-      case AppLifecycleState.hidden:
-        print('hidden');
-    }
+    final bloc = context.authBloc;
+
+    bloc.state.whenOrNull(
+      authorized: () {
+        switch (state) {
+          case AppLifecycleState.paused:
+            if (bloc.isOnline) {
+              bloc.add(const AuthGoOffline());
+            }
+          case AppLifecycleState.resumed:
+            if (!bloc.isOnline) {
+              bloc.add(const AuthGoOnline());
+            }
+          case AppLifecycleState.detached:
+            if (bloc.isOnline) {
+              bloc.add(const AuthGoOffline());
+            }
+          case AppLifecycleState.inactive:
+            if (bloc.isOnline) {
+              bloc.add(const AuthGoOffline());
+            }
+          case AppLifecycleState.hidden:
+            if (bloc.isOnline) {
+              bloc.add(const AuthGoOffline());
+            }
+        }
+      },
+    );
   }
 }

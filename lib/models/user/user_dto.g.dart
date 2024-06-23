@@ -12,6 +12,7 @@ UserDto _$UserDtoFromJson(Map<String, dynamic> json) => UserDto(
       name: json['name'],
       email: json['email'],
       linearColors: json['linearColors'],
+      isOnline: json['isOnline'],
     );
 
 Map<String, dynamic> _$UserDtoToJson(UserDto instance) => <String, dynamic>{
@@ -20,4 +21,5 @@ Map<String, dynamic> _$UserDtoToJson(UserDto instance) => <String, dynamic>{
       'name': instance.name,
       'email': instance.email,
       'linearColors': instance.linearColors,
+      'isOnline': instance.isOnline,
     };

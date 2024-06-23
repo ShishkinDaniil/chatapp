@@ -26,6 +26,20 @@ final class AuthLogin extends AuthEvent {
       ];
 }
 
+final class AuthGoOnline extends AuthEvent {
+  const AuthGoOnline();
+
+  @override
+  List<Object> get props => [];
+}
+
+final class AuthGoOffline extends AuthEvent {
+  const AuthGoOffline();
+
+  @override
+  List<Object> get props => [];
+}
+
 final class AuthUserChanged extends AuthEvent {
   final User? user;
   const AuthUserChanged(this.user);

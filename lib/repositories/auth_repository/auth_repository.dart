@@ -5,14 +5,11 @@ import 'package:chatapp/models/user/user_dto.dart';
 import 'package:chatapp/models/user/user_model.dart';
 import 'package:chatapp/utils/base_firestore.dart';
 import 'package:chatapp/utils/color_gen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthRepository extends BaseFireStoreProvider {
-  final FirebaseAuth firebaseAuth;
-
+class AuthRepository extends BaseFireBaseRepository {
   AuthRepository({
-    required this.firebaseAuth,
+    required super.firebaseAuth,
     required super.fireStore,
   });
 
@@ -34,11 +31,31 @@ class AuthRepository extends BaseFireStoreProvider {
     }
   }
 
+  Future<void> chageOnlineStatus(bool status) async {
+    final uid = currentUser?.uid;
+    if (uid != null) {
+      final collection =
+          await fireStore.collection(usersCollection).doc(uid).get();
+      final data = collection.data();
+      if (data != null) {
+        final user = UserDto.fromJson(
+          data,
+        );
+        if (user.isOnline != status) {
+          final onlineUser = user.copyWith(isOnline: status);
+          await fireStore.collection(usersCollection).doc(uid).set(
+                onlineUser.toJson(),
+              );
+        }
+      }
+    }
+  }
+
   Future<List<UserModel>> getUsers() async {
     final collection = await fireStore.collection(usersCollection).get();
     return collection.docs
         .where(
-          (element) => element.id != firebaseAuth.currentUser?.uid,
+          (element) => element.id != currentUser?.uid,
         )
         .map(
           (e) => UserDto.fromJson(

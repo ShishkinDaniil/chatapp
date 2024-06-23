@@ -14,6 +14,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       linearColors: (json['linearColors'] as List<dynamic>)
           .map((e) => (e as num).toInt())
           .toList(),
+      isOnline: json['isOnline'] as bool,
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -22,4 +23,5 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'name': instance.name,
       'email': instance.email,
       'linearColors': instance.linearColors,
+      'isOnline': instance.isOnline,
     };

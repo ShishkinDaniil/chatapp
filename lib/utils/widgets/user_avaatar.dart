@@ -18,10 +18,9 @@ class UserAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
         gradient: LinearGradient(
-          colors: <Color>[
-            Color(userModel.linearColors.first),
-            Color(userModel.linearColors.last),
-          ],
+          begin: Alignment.bottomCenter,
+          end: AlignmentDirectional.topEnd,
+          colors: userModel.linearColors.map((e) => Color(e)).toList(),
           tileMode: TileMode.mirror,
         ),
       ),

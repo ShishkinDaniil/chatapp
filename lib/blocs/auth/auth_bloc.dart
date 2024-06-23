@@ -22,6 +22,7 @@ part 'auth_bloc.g.dart';
 class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   late StreamSubscription<dynamic> _streamSubscription;
   final AuthRepository authRepository;
+  bool isOnline = false;
   AuthBloc(this.authRepository) : super(AuthState.notAuthorized()) {
     onBlocEvent((event) => _eventToState(event));
     _streamSubscription = authRepository.streamAuthState.listen(
@@ -39,11 +40,25 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       yield* _mapLoginToState(event);
     } else if (event is AuthRegistration) {
       yield* _mapRegToState(event);
+    } else if (event is AuthGoOnline) {
+      yield* _mapGoOnlineToState(event);
+    } else if (event is AuthGoOffline) {
+      yield* _mapGoOfflineToState(event);
     } else if (event is AuthUserChanged) {
       yield* _mapChangeToState(event);
     } else {
       assertUnhandledEvent(event);
     }
+  }
+
+  Stream<AuthState> _mapGoOnlineToState(AuthGoOnline event) async* {
+    await authRepository.chageOnlineStatus(true);
+    isOnline = true;
+  }
+
+  Stream<AuthState> _mapGoOfflineToState(AuthGoOffline event) async* {
+    await authRepository.chageOnlineStatus(false);
+    isOnline = false;
   }
 
   Stream<AuthState> _mapChangeToState(AuthUserChanged event) async* {
