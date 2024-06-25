@@ -1,18 +1,21 @@
-import 'package:bloc/bloc.dart';
-import 'package:chatapp/models/user/user_dto.dart';
+import 'package:chatapp/models/room/room_model.dart';
 import 'package:chatapp/models/user/user_model.dart';
 import 'package:chatapp/repositories/auth_repository/auth_repository.dart';
+import 'package:chatapp/repositories/rooms_repository/rooms_repository.dart';
 import 'package:chatapp/utils/assert_bloc.dart';
 import 'package:chatapp/utils/extentions/event_to_state_extention.dart';
 import 'package:equatable/equatable.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'home_screen_event.dart';
 part 'home_screen_state.dart';
 
 class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
+  final UserModel currentUser;
   final AuthRepository authRepository;
-  HomeScreenBloc(this.authRepository) : super(const HomeScreenInitial()) {
+  final RoomsRepository roomsRepository;
+  HomeScreenBloc(this.authRepository, this.currentUser, this.roomsRepository)
+      : super(const HomeScreenInitial()) {
     onBlocEvent((event) => _eventToState(event));
   }
 
@@ -37,8 +40,16 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   Stream<HomeScreenState> _toSuccessState() async* {
     yield const HomeScreenLoadInProgress();
 
-    final users = await authRepository.getUsers();
+    final rooms = await roomsRepository.getRooms(currentUser);
+    final except = rooms
+        .map((e) => e.participants
+            .firstWhere((element) => element.uid != currentUser.uid))
+        .toList();
+    except.add(currentUser);
 
-    yield HomeScreenLoadSuccess(users);
+    final users =
+        await authRepository.getUsers(currentUser: currentUser, except: except);
+
+    yield HomeScreenLoadSuccess(users, rooms);
   }
 }

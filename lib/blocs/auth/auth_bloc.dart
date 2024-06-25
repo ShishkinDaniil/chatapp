@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:convert' as convert;
 
-import 'package:bloc/bloc.dart';
+import 'package:chatapp/models/user/user_model.dart';
 import 'package:chatapp/repositories/auth_repository/auth_repository.dart';
 import 'package:chatapp/utils/assert_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:chatapp/utils/extentions/event_to_state_extention.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -52,12 +50,12 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   }
 
   Stream<AuthState> _mapGoOnlineToState(AuthGoOnline event) async* {
-    await authRepository.chageOnlineStatus(true);
+    authRepository.goOnline();
     isOnline = true;
   }
 
   Stream<AuthState> _mapGoOfflineToState(AuthGoOffline event) async* {
-    await authRepository.chageOnlineStatus(false);
+    authRepository.goOffline();
     isOnline = false;
   }
 
@@ -68,7 +66,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     if (event.user == null) {
       yield _AuthStateNotAuthorized();
     } else {
-      yield _AuthStateAuthorized();
+      final user = await authRepository.getCurrentUser();
+      yield _AuthStateAuthorized(user);
     }
   }
 
@@ -78,8 +77,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         event.email,
         event.password,
       );
+      authRepository.goOnline();
+      isOnline = true;
 
-      yield _AuthStateAuthorized();
+      yield _AuthStateAuthorized(user);
     } catch (e) {
       yield _AuthStateError(e);
     }
@@ -87,13 +88,15 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
   Stream<AuthState> _mapRegToState(AuthRegistration event) async* {
     try {
-      final user = authRepository.signUpWithEmailAndPassword(
+      final user = await authRepository.signUpWithEmailAndPassword(
         event.email,
         event.password,
         event.surname,
         event.name,
       );
-      yield _AuthStateAuthorized();
+      authRepository.goOnline();
+      isOnline = true;
+      yield _AuthStateAuthorized(user);
     } catch (e) {
       yield _AuthStateError(e);
     }
@@ -108,13 +111,15 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   @override
   AuthState? fromJson(Map<String, dynamic> json) {
     final state = AuthState.fromJson(json);
-    return state.whenOrNull(authorized: () => AuthState.authorized());
+    return state.whenOrNull(
+        authorized: (currentUser) => AuthState.authorized(currentUser));
   }
 
   @override
   Map<String, dynamic>? toJson(AuthState state) {
     return state
-            .whenOrNull(authorized: () => AuthState.authorized())
+            .whenOrNull(
+                authorized: (currentUser) => AuthState.authorized(currentUser))
             ?.toJson() ??
         AuthState.notAuthorized().toJson();
   }

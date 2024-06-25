@@ -26,7 +26,7 @@ class UserAvatar extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          '${userModel.name[1]}${userModel.surname[1]}'.toUpperCase(),
+          '${userModel.name[0]}${userModel.surname[0]}'.toUpperCase(),
           style: ChatTheme.homeIconProfileTextStyle,
           textScaler: TextScaler.noScaling,
         ),

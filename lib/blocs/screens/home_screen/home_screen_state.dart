@@ -23,8 +23,9 @@ final class HomeScreenLoadInProgress extends HomeScreenState {
 
 final class HomeScreenLoadSuccess extends HomeScreenState {
   final List<UserModel> users;
-  const HomeScreenLoadSuccess(this.users);
+  final List<RoomModel> rooms;
+  const HomeScreenLoadSuccess(this.users, this.rooms);
 
   @override
-  List<Object> get props => [users];
+  List<Object> get props => [users, rooms];
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthBuilder extends StatelessWidget {
-  final WidgetBuilder isAuthorized;
+  final ValueWidgetBuilder isAuthorized;
   final WidgetBuilder isNotAuthorized;
 
   const AuthBuilder({
@@ -36,7 +36,8 @@ class AuthBuilder extends StatelessWidget {
       },
       builder: (context, state) {
         return state.whenOrNull(
-              authorized: () => isAuthorized(context),
+              authorized: (currentUser) =>
+                  isAuthorized(context, currentUser, this),
             ) ??
             isNotAuthorized(context);
       },

@@ -22,13 +22,9 @@ final class ChatScreenLoadInProgress extends ChatScreenState {
 }
 
 final class ChatScreenLoadSuccess extends ChatScreenState {
-  final bool recvUserIsOnline;
-  const ChatScreenLoadSuccess(
-    this.recvUserIsOnline,
-  );
+  final List<MessageModel> messages;
+  const ChatScreenLoadSuccess(this.messages);
 
   @override
-  List<Object> get props => [
-        recvUserIsOnline,
-      ];
+  List<Object> get props => [messages];
 }

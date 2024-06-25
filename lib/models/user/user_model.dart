@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -13,7 +10,6 @@ class UserModel {
   final String name;
   final String email;
   final List<int> linearColors;
-  final bool isOnline;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
@@ -25,7 +21,6 @@ class UserModel {
     required this.name,
     required this.email,
     required this.linearColors,
-    required this.isOnline,
   });
 
   UserModel copyWith({
@@ -34,7 +29,6 @@ class UserModel {
     String? name,
     String? email,
     List<int>? linearColors,
-    bool? isOnline,
     Timestamp? lastActive,
   }) {
     return UserModel(
@@ -43,7 +37,6 @@ class UserModel {
       name: name ?? this.name,
       email: email ?? this.email,
       linearColors: linearColors ?? this.linearColors,
-      isOnline: isOnline ?? this.isOnline,
     );
   }
 }

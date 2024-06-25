@@ -48,6 +48,9 @@ dependencies:
   json_annotation: ^4.9.0
   freezed: ^2.5.2
   freezed_annotation: ^2.4.1
+  firebase_database: ^10.4.9
+  grouped_list: ^5.1.2
+  flutter_svg: ^2.0.10+1
 
 
 dev_dependencies:
@@ -68,7 +71,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - assets/icons/
+    
   fonts:
     - family: Gilroy
       fonts:

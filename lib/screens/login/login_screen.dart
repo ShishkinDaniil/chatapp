@@ -192,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
               _onTapToSignUp(context.authBloc);
             }
           },
-          child: const Text('Sign Up')),
+          child: const Text('Зарегестрироваться')),
       TextButton(
         onPressed: () {
           _passwordController.text = '';

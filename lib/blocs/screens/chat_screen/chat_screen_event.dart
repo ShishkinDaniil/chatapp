@@ -14,9 +14,17 @@ final class ChatScreenShown extends ChatScreenEvent {
   List<Object> get props => const [];
 }
 
-final class ChatScreenUpdate extends ChatScreenEvent {
-  const ChatScreenUpdate();
+final class ChatScreenChanged extends ChatScreenEvent {
+  const ChatScreenChanged();
 
   @override
   List<Object> get props => const [];
+}
+
+final class ChatScreenSentMessage extends ChatScreenEvent {
+  final String message;
+  const ChatScreenSentMessage(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

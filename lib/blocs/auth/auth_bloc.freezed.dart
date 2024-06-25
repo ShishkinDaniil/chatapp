@@ -36,7 +36,7 @@ mixin _$AuthState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() notAuthorized,
-    required TResult Function() authorized,
+    required TResult Function(UserModel currentUser) authorized,
     required TResult Function() waiting,
     required TResult Function(dynamic error) error,
   }) =>
@@ -44,7 +44,7 @@ mixin _$AuthState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? notAuthorized,
-    TResult? Function()? authorized,
+    TResult? Function(UserModel currentUser)? authorized,
     TResult? Function()? waiting,
     TResult? Function(dynamic error)? error,
   }) =>
@@ -52,7 +52,7 @@ mixin _$AuthState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? notAuthorized,
-    TResult Function()? authorized,
+    TResult Function(UserModel currentUser)? authorized,
     TResult Function()? waiting,
     TResult Function(dynamic error)? error,
     required TResult orElse(),
@@ -153,7 +153,7 @@ class _$AuthStateNotAuthorizedImpl implements _AuthStateNotAuthorized {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() notAuthorized,
-    required TResult Function() authorized,
+    required TResult Function(UserModel currentUser) authorized,
     required TResult Function() waiting,
     required TResult Function(dynamic error) error,
   }) {
@@ -164,7 +164,7 @@ class _$AuthStateNotAuthorizedImpl implements _AuthStateNotAuthorized {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? notAuthorized,
-    TResult? Function()? authorized,
+    TResult? Function(UserModel currentUser)? authorized,
     TResult? Function()? waiting,
     TResult? Function(dynamic error)? error,
   }) {
@@ -175,7 +175,7 @@ class _$AuthStateNotAuthorizedImpl implements _AuthStateNotAuthorized {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? notAuthorized,
-    TResult Function()? authorized,
+    TResult Function(UserModel currentUser)? authorized,
     TResult Function()? waiting,
     TResult Function(dynamic error)? error,
     required TResult orElse(),
@@ -243,6 +243,8 @@ abstract class _$$AuthStateAuthorizedImplCopyWith<$Res> {
   factory _$$AuthStateAuthorizedImplCopyWith(_$AuthStateAuthorizedImpl value,
           $Res Function(_$AuthStateAuthorizedImpl) then) =
       __$$AuthStateAuthorizedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({UserModel currentUser});
 }
 
 /// @nodoc
@@ -252,69 +254,94 @@ class __$$AuthStateAuthorizedImplCopyWithImpl<$Res>
   __$$AuthStateAuthorizedImplCopyWithImpl(_$AuthStateAuthorizedImpl _value,
       $Res Function(_$AuthStateAuthorizedImpl) _then)
       : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? currentUser = null,
+  }) {
+    return _then(_$AuthStateAuthorizedImpl(
+      null == currentUser
+          ? _value.currentUser
+          : currentUser // ignore: cast_nullable_to_non_nullable
+              as UserModel,
+    ));
+  }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AuthStateAuthorizedImpl implements _AuthStateAuthorized {
-  _$AuthStateAuthorizedImpl({final String? $type})
+  _$AuthStateAuthorizedImpl(this.currentUser, {final String? $type})
       : $type = $type ?? 'authorized';
 
   factory _$AuthStateAuthorizedImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthStateAuthorizedImplFromJson(json);
+
+  @override
+  final UserModel currentUser;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'AuthState.authorized()';
+    return 'AuthState.authorized(currentUser: $currentUser)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AuthStateAuthorizedImpl);
+            other is _$AuthStateAuthorizedImpl &&
+            (identical(other.currentUser, currentUser) ||
+                other.currentUser == currentUser));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, currentUser);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AuthStateAuthorizedImplCopyWith<_$AuthStateAuthorizedImpl> get copyWith =>
+      __$$AuthStateAuthorizedImplCopyWithImpl<_$AuthStateAuthorizedImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() notAuthorized,
-    required TResult Function() authorized,
+    required TResult Function(UserModel currentUser) authorized,
     required TResult Function() waiting,
     required TResult Function(dynamic error) error,
   }) {
-    return authorized();
+    return authorized(currentUser);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? notAuthorized,
-    TResult? Function()? authorized,
+    TResult? Function(UserModel currentUser)? authorized,
     TResult? Function()? waiting,
     TResult? Function(dynamic error)? error,
   }) {
-    return authorized?.call();
+    return authorized?.call(currentUser);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? notAuthorized,
-    TResult Function()? authorized,
+    TResult Function(UserModel currentUser)? authorized,
     TResult Function()? waiting,
     TResult Function(dynamic error)? error,
     required TResult orElse(),
   }) {
     if (authorized != null) {
-      return authorized();
+      return authorized(currentUser);
     }
     return orElse();
   }
@@ -365,10 +392,16 @@ class _$AuthStateAuthorizedImpl implements _AuthStateAuthorized {
 }
 
 abstract class _AuthStateAuthorized implements AuthState {
-  factory _AuthStateAuthorized() = _$AuthStateAuthorizedImpl;
+  factory _AuthStateAuthorized(final UserModel currentUser) =
+      _$AuthStateAuthorizedImpl;
 
   factory _AuthStateAuthorized.fromJson(Map<String, dynamic> json) =
       _$AuthStateAuthorizedImpl.fromJson;
+
+  UserModel get currentUser;
+  @JsonKey(ignore: true)
+  _$$AuthStateAuthorizedImplCopyWith<_$AuthStateAuthorizedImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -417,7 +450,7 @@ class _$AuthStateWaitingImpl implements _AuthStateWaiting {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() notAuthorized,
-    required TResult Function() authorized,
+    required TResult Function(UserModel currentUser) authorized,
     required TResult Function() waiting,
     required TResult Function(dynamic error) error,
   }) {
@@ -428,7 +461,7 @@ class _$AuthStateWaitingImpl implements _AuthStateWaiting {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? notAuthorized,
-    TResult? Function()? authorized,
+    TResult? Function(UserModel currentUser)? authorized,
     TResult? Function()? waiting,
     TResult? Function(dynamic error)? error,
   }) {
@@ -439,7 +472,7 @@ class _$AuthStateWaitingImpl implements _AuthStateWaiting {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? notAuthorized,
-    TResult Function()? authorized,
+    TResult Function(UserModel currentUser)? authorized,
     TResult Function()? waiting,
     TResult Function(dynamic error)? error,
     required TResult orElse(),
@@ -577,7 +610,7 @@ class _$AuthStateErrorImpl implements _AuthStateError {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() notAuthorized,
-    required TResult Function() authorized,
+    required TResult Function(UserModel currentUser) authorized,
     required TResult Function() waiting,
     required TResult Function(dynamic error) error,
   }) {
@@ -588,7 +621,7 @@ class _$AuthStateErrorImpl implements _AuthStateError {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? notAuthorized,
-    TResult? Function()? authorized,
+    TResult? Function(UserModel currentUser)? authorized,
     TResult? Function()? waiting,
     TResult? Function(dynamic error)? error,
   }) {
@@ -599,7 +632,7 @@ class _$AuthStateErrorImpl implements _AuthStateError {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? notAuthorized,
-    TResult Function()? authorized,
+    TResult Function(UserModel currentUser)? authorized,
     TResult Function()? waiting,
     TResult Function(dynamic error)? error,
     required TResult orElse(),

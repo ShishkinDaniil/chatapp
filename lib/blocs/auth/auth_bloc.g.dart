@@ -21,12 +21,14 @@ Map<String, dynamic> _$$AuthStateNotAuthorizedImplToJson(
 _$AuthStateAuthorizedImpl _$$AuthStateAuthorizedImplFromJson(
         Map<String, dynamic> json) =>
     _$AuthStateAuthorizedImpl(
+      UserModel.fromJson(json['currentUser'] as Map<String, dynamic>),
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$$AuthStateAuthorizedImplToJson(
         _$AuthStateAuthorizedImpl instance) =>
     <String, dynamic>{
+      'currentUser': instance.currentUser,
       'runtimeType': instance.$type,
     };
 

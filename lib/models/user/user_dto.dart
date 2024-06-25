@@ -10,7 +10,6 @@ class UserDto {
   final dynamic name;
   final dynamic email;
   final dynamic linearColors;
-  final dynamic isOnline;
 
   factory UserDto.fromJson(Map<String, dynamic> json) =>
       _$UserDtoFromJson(json);
@@ -22,7 +21,6 @@ class UserDto {
     this.name,
     this.email,
     this.linearColors,
-    this.isOnline,
   });
 
   UserDto copyWith({
@@ -31,7 +29,6 @@ class UserDto {
     String? name,
     String? email,
     List<int>? linearColors,
-    bool? isOnline,
   }) {
     return UserDto(
       uid: uid ?? this.uid,
@@ -39,7 +36,6 @@ class UserDto {
       name: name ?? this.name,
       email: email ?? this.email,
       linearColors: linearColors ?? this.linearColors,
-      isOnline: isOnline ?? this.isOnline,
     );
   }
 
@@ -49,7 +45,6 @@ class UserDto {
       surname: surname,
       name: name,
       email: email,
-      isOnline: isOnline,
       linearColors: (linearColors as List<dynamic>)
           .map((e) => (e as num).toInt())
           .toList(),

@@ -6,66 +6,106 @@ import 'package:chatapp/models/user/user_model.dart';
 import 'package:chatapp/utils/base_firestore.dart';
 import 'package:chatapp/utils/color_gen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class AuthRepository extends BaseFireBaseRepository {
+  StreamSubscription? _onlineSubscription;
   AuthRepository({
+    required super.firebaseDatabase,
     required super.firebaseAuth,
     required super.fireStore,
   });
 
+  Future<void> _configOnline() async {
+    final uid = currentUser?.uid;
+    if (uid != null) {
+      DatabaseReference con;
+      final myconnRef = onlineStatusDatabase.child(uid);
+      await firebaseDatabase.goOnline();
+
+      _onlineSubscription = firebaseDatabase
+          .ref()
+          .child('.info/connected')
+          .onValue
+          .listen((event) {
+        if (event.snapshot.value != null) {
+          con = myconnRef;
+          con.onDisconnect().remove();
+          con.set(true);
+        }
+      });
+    }
+  }
+
+  void goOnline() {
+    _configOnline();
+  }
+
+  void goOffline() {
+    _onlineSubscription?.cancel();
+    firebaseDatabase.goOffline();
+  }
+
+  Future<UserModel> getCurrentUser() async {
+    final currUid = currentUser?.uid;
+    final data =
+        (await fireStore.collection(usersCollection).doc(currUid).get())
+            .data()!;
+
+    return UserDto.fromJson(
+      data,
+    ).toEntity();
+  }
+
   Stream<User?> get streamAuthState => firebaseAuth.authStateChanges();
 
-  Future<UserCredential> signInWithEmailAndPassword(
+  Future<UserModel> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
     try {
-      final userCr = await firebaseAuth.signInWithEmailAndPassword(
+      await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      final user = await getCurrentUser();
 
-      return userCr;
+      return user;
     } on FirebaseAuthException catch (e) {
       throw (e.code);
     }
   }
 
-  Future<void> chageOnlineStatus(bool status) async {
-    final uid = currentUser?.uid;
-    if (uid != null) {
-      final collection =
-          await fireStore.collection(usersCollection).doc(uid).get();
-      final data = collection.data();
-      if (data != null) {
-        final user = UserDto.fromJson(
-          data,
-        );
-        if (user.isOnline != status) {
-          final onlineUser = user.copyWith(isOnline: status);
-          await fireStore.collection(usersCollection).doc(uid).set(
-                onlineUser.toJson(),
-              );
-        }
-      }
+  Future<List<UserModel>> getUsers(
+      {List<UserModel>? except, required UserModel currentUser}) async {
+    if (except != null) {
+      final collection = await fireStore.collection(usersCollection).get();
+      final docs = collection.docs;
+      docs.removeWhere(
+        (element) => except.any((ex) => ex.uid == element.id),
+      );
+      return docs
+          .map((e) => UserModel.fromJson(
+                e.data(),
+              ))
+          .toList();
+    } else {
+      final collection = await fireStore.collection(usersCollection).get();
+
+      return collection.docs
+          .where(
+            (element) => element.id != currentUser.uid,
+          )
+          .map(
+            (e) => UserModel.fromJson(
+              e.data(),
+            ),
+          )
+          .toList();
     }
   }
 
-  Future<List<UserModel>> getUsers() async {
-    final collection = await fireStore.collection(usersCollection).get();
-    return collection.docs
-        .where(
-          (element) => element.id != currentUser?.uid,
-        )
-        .map(
-          (e) => UserDto.fromJson(
-            e.data(),
-          ).toEntity(),
-        )
-        .toList();
-  }
-
-  Future<UserCredential> signUpWithEmailAndPassword(
+  Future<UserModel> signUpWithEmailAndPassword(
     String email,
     String password,
     String surname,
@@ -79,6 +119,7 @@ class AuthRepository extends BaseFireBaseRepository {
       final indexLinear = Random().nextInt(ColorGen.listLinears.length - 1);
 
       final user = UserDto(
+        uid: userCr.user?.uid,
         email: userCr.user?.email,
         name: name,
         surname: surname,
@@ -90,7 +131,7 @@ class AuthRepository extends BaseFireBaseRepository {
           .doc(userCr.user?.uid)
           .set(user.toJson());
 
-      return userCr;
+      return user.toEntity();
     } on FirebaseAuthException catch (e) {
       throw (e.code);
     }

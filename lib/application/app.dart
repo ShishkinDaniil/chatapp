@@ -4,9 +4,11 @@ import 'package:chatapp/application/theme.dart';
 import 'package:chatapp/blocs/auth/auth_bloc.dart';
 import 'package:chatapp/repositories/auth_repository/auth_repository.dart';
 import 'package:chatapp/repositories/chat_repository/chat_repository.dart';
+import 'package:chatapp/repositories/rooms_repository/rooms_repository.dart';
 import 'package:chatapp/screens/root/root_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,6 +43,7 @@ class ChatApp extends StatelessWidget {
   Widget _buildRepositories(Widget child) {
     final firestore = FirebaseFirestore.instance;
     final firebaseAuth = FirebaseAuth.instance;
+    final database = FirebaseDatabase.instance;
 
     return MultiRepositoryProvider(
       providers: [
@@ -48,10 +51,19 @@ class ChatApp extends StatelessWidget {
           create: (context) => AuthRepository(
             fireStore: firestore,
             firebaseAuth: firebaseAuth,
+            firebaseDatabase: database,
           ),
         ),
         RepositoryProvider<ChatRepository>(
           create: (context) => ChatRepository(
+            firebaseDatabase: database,
+            fireStore: firestore,
+            firebaseAuth: firebaseAuth,
+          ),
+        ),
+        RepositoryProvider<RoomsRepository>(
+          create: (context) => RoomsRepository(
+            firebaseDatabase: database,
             fireStore: firestore,
             firebaseAuth: firebaseAuth,
           ),
@@ -85,7 +97,7 @@ class _AppLifeCycleWatcherForOnlineIndicatorState
         final bloc = context.authBloc;
 
         bloc.state.whenOrNull(
-          authorized: () {
+          authorized: (_) {
             if (!bloc.isOnline) {
               bloc.add(const AuthGoOnline());
             }
@@ -94,7 +106,6 @@ class _AppLifeCycleWatcherForOnlineIndicatorState
       },
       onStateChange: _onStateChanged,
       onExitRequested: () async {
-        print('exited');
         return AppExitResponse.exit;
       },
     );
@@ -115,7 +126,7 @@ class _AppLifeCycleWatcherForOnlineIndicatorState
     final bloc = context.authBloc;
 
     bloc.state.whenOrNull(
-      authorized: () {
+      authorized: (_) {
         switch (state) {
           case AppLifecycleState.paused:
             if (bloc.isOnline) {
