@@ -309,13 +309,16 @@ class _ChatContentState extends State<ChatContent> {
                   bottomStart: Radius.circular(12),
                 ),
               ),
-              child: Column(
-                children: [
-                  Text(
-                    message.messageTxt,
-                    style: ChatTheme.recvMessageTextStyle,
-                  )
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    Text(
+                      message.messageTxt,
+                      style: ChatTheme.recvMessageTextStyle,
+                    )
+                  ],
+                ),
               ),
             ),
           ),
