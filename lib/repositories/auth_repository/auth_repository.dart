@@ -116,7 +116,7 @@ class AuthRepository extends BaseFireBaseRepository {
         email: email,
         password: password,
       );
-      final indexLinear = Random().nextInt(ColorGen.listLinears.length - 1);
+      final indexLinear = Random().nextInt(ColorGen.listLinears.length);
 
       final user = UserDto(
         uid: userCr.user?.uid,
